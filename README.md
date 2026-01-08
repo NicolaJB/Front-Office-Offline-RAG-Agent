@@ -12,6 +12,26 @@ An offline Retrieval-Augmented Generation (RAG) agent for financial documents. C
 - Tool integration for custom queries (e.g., stock prices)
 - Fully offline – no cloud dependencies required
 
+## Grounded, Cited Answers
+
+This offline RAG agent retrieves the most relevant document chunks for a query, calls the prices.json tool when appropriate, and appends a formal Sources section showing file names and locations. Answers are thus grounded and traceable. A placeholder in agent.py indicates where an LLM could be integrated to rewrite the answer in natural language with automatic citations. Example output includes context, tool results, and numbered sources, ensuring clarity and reproducibility for financial queries.
+
+Example output for query stock price of AAPL:
+```
+Context (first 500 chars): red.
+Benchmark: SPY; QQQ referenced for context only.
+Risk model: simplified style proxies for demonstration.
+...
+Answer based on retrieved documents.
+
+[Price Tool Output]: AAPL: [{'date': '2025-06-01', 'close': 210.12}, ... ]
+
+Sources:
+[1] data/fund_letters/q2_letter.html — unknown location
+[2] data/fund_letters/q2_letter.html — unknown location
+[3] data/fund_letters/q2_letter.html — unknown location
+```
+
 ## Folder Structure
 ```
 rag-agent-exercise/
