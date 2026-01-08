@@ -1,0 +1,19 @@
+# Core numerical / ML libraries
+numpy>=1.25.2,<2.6
+scipy>=1.11
+scikit-learn==1.8.0
+sentence-transformers==5.2.0
+huggingface_hub<1.0
+
+# PDF / document processing
+pypdf==6.5.0
+beautifulsoup4==4.14.3
+nltk==3.9.2
+rank_bm25==0.2.2
+pandas==2.3.3
+Optional / web & API
+
+# For potential API or web interface integration:
+fastapi==0.128.0
+uvicorn==0.40.0
+tiktoken==0.12.0
