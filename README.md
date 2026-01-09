@@ -1,150 +1,142 @@
 # Offline RAG Agent
-
-An offline Retrieval-Augmented Generation (RAG) agent for financial documents. Combines vector embeddings and BM25 keyword search to retrieve context from local documents, and supports simple tool integration (e.g., financial price lookups).
+An interactive offline Retrieval-Augmented Generation (RAG) agent for financial documents.
+It combines semantic vector search (TF-IDF) with keyword-based BM25 retrieval, supports modular tools, and prints lightweight runtime metrics.
 
 ## Features
-- Load documents from the data/ folder: .txt, .pdf, .html, .csv
-- Split documents into overlapping chunks for retrieval
-- Vector-based retrieval using Sentence Transformers
-- Keyword-based retrieval using BM25
-- Hybrid retrieval (combining vector and BM25 results)
-- Offline “answer generation” with context snippet
-- Tool integration for custom queries (e.g., stock prices)
-- Fully offline – no cloud dependencies required
+- **Hybrid retrieval**: TF-IDF embeddings + BM25 keyword search
+- Handles queries that embeddings alone may miss (numbers, tickers, rare terms)
+- Deduplicates overlapping chunks for accurate citations
 
-## Grounded, Cited Answers
+## Answer generation
+- Returns relevant context, tool outputs (e.g., price lookup), and sources
+- Terminal displays first 500 characters of context; full answers logged
 
-This offline RAG agent retrieves the most relevant document chunks for a query, calls the prices.json tool when appropriate, and appends a formal Sources section showing file names and locations. Answers are thus grounded and traceable. A placeholder in agent.py indicates where an LLM could be integrated to rewrite the answer in natural language with automatic citations. Example output includes context, tool results, and numbered sources, ensuring clarity and reproducibility for financial queries.
+## Modular tools
+- Add tools under app/tools/ and update mapping in app/main.py
+Example: price tool triggered for queries containing "price"
 
-Example output for query stock price of AAPL:
-```
-Context (first 500 chars): red.
-Benchmark: SPY; QQQ referenced for context only.
-Risk model: simplified style proxies for demonstration.
-...
-Answer based on retrieved documents.
+## Lightweight observability
+- Per-query metrics: retrieval latency, tool runtime, sources cited
+- Fully offline, no external services required
 
-[Price Tool Output]: AAPL: [{'date': '2025-06-01', 'close': 210.12}, ... ]
-
-Sources:
-[1] data/fund_letters/q2_letter.html — unknown location
-[2] data/fund_letters/q2_letter.html — unknown location
-[3] data/fund_letters/q2_letter.html — unknown location
-```
-
-## Folder Structure
-```
-rag-agent-exercise/
-├─ app/
-│  ├─ __init__.py
-│  ├─ main.py           # Entry point
-│  ├─ ingest.py         # Document loading and vectorstore
-│  ├─ retriever.py      # Vector + BM25 retrieval
-│  ├─ agent.py          # Query handling & answer generation
-│  └─ tools/
-│     └─ prices.py      # Example tool for stock prices
-├─ data/                # Place your documents here
-│  ├─ fund_letters/
-│  │  └─ q2_letter.ht...
-│  └─ ...
-├─ backend/
-│  └─ venv/             # Python virtual environment
-└─ README.md
-```
-## Setup
-Clone the repository:
+## Installation
 ```bash
-git clone https://github.com/NicolaJB/rag-agent-exercise.git
+git clone https://github.com/NicolaJB/Front-Office-RAG-Agent-Exercise
 cd rag-agent-exercise
-```
-Create and activate a virtual environment:
-```bash
-python3 -m venv backend/venv
-source backend/venv/bin/activate
-```
-
-Install dependencies:
-```bash
-pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Dependencies
+## Data
 
-### Core numerical / ML libraries
-These are required for embeddings, vector similarity, and ML pipelines:
-- numpy>=1.25.2,<2.6
-- scipy>=1.11
-- scikit-learn==1.8.0
-- sentence-transformers==5.2.0
-- huggingface_hub<1.0
+Required:
+- fund_letters/ — HTML fund letters
+- addendum.pdf — PDF addendum
+- chat_logs/ — CSV chat logs
 
-### PDF / document processing
-Used for reading, cleaning, and ranking text documents:
-- pypdf==6.5.0
-- beautifulsoup4==4.14.3
-- nltk==3.9.2
-- rank_bm25==0.2.2
-- pandas==2.3.3
+Optional:
+- analyst_notes/
+- glossary/
+- sample_prices/
 
-### Optional / web & API
-For potential API or web interface integration:
-- fastapi==0.128.0
-- uvicorn==0.40.0
-- tiktoken==0.12.0
+The agent runs fully with required data; optional folders demonstrate ingestion of extra document types.
 
-⚠️ Ensure your virtual environment is activated before running the project.
-
-## Running the Agent:
+## Quick CLI Usage
 ```bash
-python3 -m app.main
+python -m app.main
+```
+- Loads and splits documents from data/
+- Builds in-memory TF-IDF vectorstore
+- Initialises BM25 index for hybrid retrieval
+- Starts interactive prompt; type 'exit' to quit
+
+Example query session:
+```
+Enter your financial query (or 'exit'): price of MSFT
+
+Vector Top-1: data/fund_letters/q2_letter.html...
+Context (first 500 chars): ...
+[Price Tool Output]: MSFT: [{'date': '2025-06-01', 'close': 410.5}, ...]
+Sources: [1] data/fund_letters/q2_letter.html — chunk 16
+--- Metrics ---
+Retrieval time: 4.7 ms
+Tool 'prices' latency: 0.76 ms
+Total time: 5.5 ms
 ```
 
-- The agent will load and split documents into chunks.
-- Builds vectorstore and BM25 model.
-
-
-Enter financial queries when prompted:
-
+## Offline Test & Evaluation
+Quick Offline Test:
 ```bash
-Enter your financial query (or 'exit'): stock price of AAPL
+python -m backend.test_main
 ```
+- Checks document ingestion, vectorstore, BM25 index
+- Executes sample queries through the agent
+- Prints answers with context, sources, and retrieval metrics
 
-Results include:
-
-- Top retrieved document chunks
-- Context snippet (first 500 characters)
-- Tool outputs (e.g., stock prices)
-
-Example Output:
+## Evaluation Harness
+```bash
+python -m eval.run_eval
 ```
-Loading and splitting documents...
-Loaded 3 documents, split into 11 chunks.
-Vectorstore created with 11 embeddings.
+- Loads queries from eval/queries.jsonl
+- Prints truncated answers (first 500 chars) in terminal
+- Logs full answers to eval/full_eval_output.txt for reproducibility and inspection
 
+
+
+## Usage Example
+1. Interactive CLI
+```bash
+python -m app.main
+```
+```
 === Offline RAG Agent Ready ===
-
-Enter your financial query (or 'exit'): stock price of AAPL
-Vector Top-1: data/fund_letters/q2_letter.ht...
-Vector Top-2: data/fund_letters/q2_letter.ht...
-Vector Top-3: data/fund_letters/q2_letter.ht...
-
---- Answer ---
-Context (first 500 chars): red. Benchmark: SPY; QQQ referenced for context only...
-Answer based on retrieved documents.
-
-[Price Tool Output]: AAPL: [{'date': '2025-06-01', 'close': 210.12}, ...]
+Enter your financial query (or 'exit'): price of MSFT
+Vector Top-1: data/fund_letters/q2_letter.html
+Context (first 500 chars): ...
+[Price Tool Output]: MSFT: [{'date': '2025-06-01', 'close': 410.5}, ...]
+Sources: [1] data/fund_letters/q2_letter.html — chunk 16
+--- Metrics ---
+Retrieval time: 4.7 ms
+Tool 'prices' latency: 0.76 ms
+Total time: 5.5 ms
+Enter your financial query (or 'exit'):
 ```
 
-## Notes
-- The Document class is custom for offline usage, avoiding langchain_core.
-- Hybrid retrieval combines vector similarity and BM25 keyword search.
-- Tool integration is modular – add new tools under app/tools/.
-- Designed for offline evaluation, but the vectorstore can scale with more documents.
-- Ensure NumPy, SciPy, and scikit-learn versions are compatible to avoid runtime errors.
+2. Quick Offline Test
+```bash
+python -m backend.test_main
+```
+- Runs a small set of sample queries
+- Prints context, sources, and retrieval metrics
+- Confirms vectorstore and BM25 ingestion are working
 
-## Future Improvements
-- Use an actual language model for answer generation
-- Add caching of embeddings for faster startup
-- Expand hybrid retrieval weighting between BM25 and vectors
-- Improve context formatting and truncation for better readability
+3. Evaluation Harness
+```bash
+python -m eval.run_eval
+```
+- Loads queries from eval/queries.jsonl
+- Prints truncated answers (first 500 chars) in terminal
+- Logs full answers to eval/full_eval_output.txt for reference
+
+## Vector Storage
+- TF-IDF vectors stored in memory (sklearn.TfidfVectorizer)
+- Combined with BM25 for hybrid retrieval 
+- Optional: integrate Qdrant for persistent vector storage, scaling, or multi-user deployments
+- CLI pipeline does not require Qdrant; included only for demonstration/optional scaling.
+
+## Extending the Agent
+
+- **Add tools:** app/tools/ + update app/main.py
+- **Add data types:** extend app/ingest.py for new formats (PDF, CSV, HTML, text)
+- **Metrics/logging:** captured per-query, can extend or redirect to logs
+
+## Environment Configuration (.env)
+Optional, for extensions only:
+
+- OPENAI_API_KEY — if connecting to an external LLM
+- DEFAULT_MODEL — defaults to local embeddings, not used in offline CLI
+- QDRANT_URL / QDRANT_COLLECTION — optional Qdrant database
+- EMBED_MODEL — embedding model for vector representations
+- HOST / PORT — relevant only for API server deployments
+- LOG_DIR — directory for logs
+
+Offline RAG agent runs fully without OpenAI, Qdrant, or a web server.

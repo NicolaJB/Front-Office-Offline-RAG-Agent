@@ -1,9 +1,10 @@
-# app/retriever.py - Implement hybrid/BM25+vector retrieval
-# Supports semantic search via vectors and keyword search via BM25,
-# where exact numbers, tickers, or terms might not be captured well by embeddings alone
-# Retriever to combine classical IR (BM25, handling exact keyword matches, as against pure FAISS similarity search)
-# with vector embeddings (handling semantic matches)
 # app/retriever.py
+"""
+Hybrid retriever for offline RAG agent:
+- Combines vector-based semantic search (TF-IDF) with keyword search (BM25)
+- Handles cases where exact terms (numbers, tickers, or rare words) may be missed by embeddings
+- Keeps only unique chunks after combining results from both retrieval methods
+"""
 from rank_bm25 import BM25Okapi
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity

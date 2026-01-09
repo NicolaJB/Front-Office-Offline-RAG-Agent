@@ -1,6 +1,5 @@
-# Price load tool
-# looks up price for given financial instrument from stub JSON file
 # app/tools/prices.py
+# looks up price for given financial instrument from stub JSON file
 import json
 import os
 

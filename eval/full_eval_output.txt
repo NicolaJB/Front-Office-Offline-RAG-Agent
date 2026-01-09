@@ -1,0 +1,278 @@
+Query: Summarise market hours for equities and FX.
+Full Answer:
+Context (first 500 chars): 
+
+
+Q2 Research Letter — Breadth, Factor Tilts, and Liquidity
+
+
+
+Q2 Research Letter
+Executive Summary. In Q2, breadth weakened while the headline advanced. Returns were concentrated in a narrow cohort of mega-cap growth names. We maintained modest tilts to Momentum and Quality, with a small Value neutralizer to mitigate sector concentration.
+1. Market Overview
+US equities, proxied by SPY, extended gains during the quarter with higher sensitivity around macro data releases. For reference during th...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/fund_letters/q2_letter.html — chunk 13
+[2] data/analyst_notes/sample_note.pdf — page 1
+[3] data/fund_letters/q2_letter.html — chunk 14
+
+--- Metrics ---
+Retrieval time: 1.14 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 1.16 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: What is the most recent close for MSFT?
+Full Answer:
+Context (first 500 chars): a pricing source.
+Note:
+Where narrative timing differs, the most recent verified data mark applies.
+
+ used at the time of drafting. Where figures differ between commentary dates, rely on the most recent verified mark for any “latest close” questions.
+7. Earnings Commentary
+We observed dispersion in large‑cap technology earnings with outsized contributions from a handful of mega-cap names.
+Later in the quarter, earnings‑driven dispersion persisted within mega‑cap technology, with breadth failing ...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/fund_letters/q2_macro_addendum.pdf — page 1
+[2] data/fund_letters/q2_letter.html — chunk 17
+[3] data/fund_letters/q2_letter.html — chunk 18
+
+--- Metrics ---
+Retrieval time: 0.94 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 0.96 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: Did the Q2 letter reference SPY?
+Full Answer:
+Context (first 500 chars): 
+
+
+Q2 Research Letter — Breadth, Factor Tilts, and Liquidity
+
+
+
+Q2 Research Letter
+Executive Summary. In Q2, breadth weakened while the headline advanced. Returns were concentrated in a narrow cohort of mega-cap growth names. We maintained modest tilts to Momentum and Quality, with a small Value neutralizer to mitigate sector concentration.
+1. Market Overview
+US equities, proxied by SPY, extended gains during the quarter with higher sensitivity around macro data releases. For reference during th...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/fund_letters/q2_letter.html — chunk 13
+[2] data/fund_letters/q2_macro_addendum.pdf — page 1
+[3] data/fund_letters/q2_letter.html — chunk 16
+
+--- Metrics ---
+Retrieval time: 0.9 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 0.92 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: What factors were tilted towards in Q2?
+Full Answer:
+Context (first 500 chars): 
+
+
+Q2 Research Letter — Breadth, Factor Tilts, and Liquidity
+
+
+
+Q2 Research Letter
+Executive Summary. In Q2, breadth weakened while the headline advanced. Returns were concentrated in a narrow cohort of mega-cap growth names. We maintained modest tilts to Momentum and Quality, with a small Value neutralizer to mitigate sector concentration.
+1. Market Overview
+US equities, proxied by SPY, extended gains during the quarter with higher sensitivity around macro data releases. For reference during th...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/fund_letters/q2_letter.html — chunk 13
+[2] data/fund_letters/q2_macro_addendum.pdf — page 1
+[3] data/chat_logs/desk_chat.csv — row 5
+
+--- Metrics ---
+Retrieval time: 0.88 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 0.9 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: What was the last price for EURUSD?
+Full Answer:
+Context (first 500 chars): 2025-06-04T08:30:00Z | trader | What's our stance on momentum after last week's move?
+red.
+Benchmark: SPY; QQQ referenced for context only.
+Risk model: simplified style proxies for demonstration.
+
+5. Risk & Liquidity
+Peak end‑of‑day drawdown was approximately ‑3.4% for the composite. Realised volatility rose into CPI/FOMC weeks, with momentum carrying most active risk. Low‑liquidity names (average daily dollar volume below $5mm) were screened out.
+6. Reference Levels
+All reference levels in this...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/chat_logs/desk_chat.csv — row 5
+[2] data/fund_letters/q2_letter.html — chunk 16
+[3] data/chat_logs/desk_chat.csv — row 2
+
+--- Metrics ---
+Retrieval time: 0.86 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 0.87 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: Compare SPY performance to QQQ over the last 10 days.
+Full Answer:
+Context (first 500 chars): 2025-06-01T09:12:00Z | analyst | Check SPY vs QQQ dispersion last 10d
+2025-06-10 | 215.34
+through late June.
+Figure. Qualitative breadth proxy for SPY constituents above 50DMA.
+3. Factor Attribution
+
+
+FactorExposureAvg ExposureQ2 Contribution (bps)
+
+
+MomentumLong+0.35+42
+QualityLong+0.25+18
+ValueNeutralizer-0.05-4
+VolatilityShort-0.10+7
+
+
+Illustrative contributions; assumes weekly rebalance with 1bp cost.
+
+
+4. Methodology
+
+Window: 2025‑03‑31 to 2025‑06‑30, daily closes.
+Rebalance: weekly; transa...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/chat_logs/desk_chat.csv — row 0
+[2] data/sample_prices/aapl_prices.csv — row 9
+[3] data/fund_letters/q2_letter.html — chunk 15
+
+--- Metrics ---
+Retrieval time: 0.89 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 0.91 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: Did we maintain a momentum tilt in Q2?
+Full Answer:
+Context (first 500 chars): 
+
+
+Q2 Research Letter — Breadth, Factor Tilts, and Liquidity
+
+
+
+Q2 Research Letter
+Executive Summary. In Q2, breadth weakened while the headline advanced. Returns were concentrated in a narrow cohort of mega-cap growth names. We maintained modest tilts to Momentum and Quality, with a small Value neutralizer to mitigate sector concentration.
+1. Market Overview
+US equities, proxied by SPY, extended gains during the quarter with higher sensitivity around macro data releases. For reference during th...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/fund_letters/q2_letter.html — chunk 13
+[2] data/fund_letters/q2_macro_addendum.pdf — page 1
+[3] data/chat_logs/desk_chat.csv — row 1
+
+--- Metrics ---
+Retrieval time: 0.9 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 0.93 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: Summarise breadth observations mentioned in the letters.
+Full Answer:
+Context (first 500 chars):  used at the time of drafting. Where figures differ between commentary dates, rely on the most recent verified mark for any “latest close” questions.
+7. Earnings Commentary
+We observed dispersion in large‑cap technology earnings with outsized contributions from a handful of mega-cap names.
+Later in the quarter, earnings‑driven dispersion persisted within mega‑cap technology, with breadth failing to confirm headline strength.
+8. Glossary
+
+MomentumReturns over a 6–12 month lookback excluding the m...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/fund_letters/q2_letter.html — chunk 17
+[2] data/fund_letters/q2_letter.html — chunk 13
+[3] data/fund_letters/q2_letter.html — chunk 14
+
+--- Metrics ---
+Retrieval time: 1.39 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 1.41 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: According to the addendum, what SPY close and date should be preferred when answering 'latest' close questions?
+Full Answer:
+Context (first 500 chars):  used at the time of drafting. Where figures differ between commentary dates, rely on the most recent verified mark for any “latest close” questions.
+7. Earnings Commentary
+We observed dispersion in large‑cap technology earnings with outsized contributions from a handful of mega-cap names.
+Later in the quarter, earnings‑driven dispersion persisted within mega‑cap technology, with breadth failing to confirm headline strength.
+8. Glossary
+
+MomentumReturns over a 6–12 month lookback excluding the m...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/fund_letters/q2_letter.html — chunk 17
+[2] data/fund_letters/q2_macro_addendum.pdf — page 1
+[3] data/fund_letters/q2_letter.html — chunk 13
+
+--- Metrics ---
+Retrieval time: 1.9 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 1.99 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------
+Query: Which document discusses liquidity filters and the $5mm ADDV threshold?
+Full Answer:
+Context (first 500 chars): 2025-06-03T11:05:00Z | analyst | Liquidity names under $5mm ADDV excluded per process
+ernal files used for this exercise,
+SPY closed at 527.15 on 2025■06■20 (later than the 2025■06■10 mark cited in commentary).
+Factor Contribution (Illustrative):
+Momentum remained constructive with supportive breadth in leaders.
+Quality maintained a defensive bias.
+Value impact small; active adjustments minimal.
+Liquidity Filters and Methodology:
+Names with average daily dollar volume below $5mm were excluded.
+Q...
+Answer based on retrieved documents.
+
+Sources:
+[1] data/chat_logs/desk_chat.csv — row 4
+[2] data/fund_letters/q2_macro_addendum.pdf — page 1
+[3] data/fund_letters/q2_letter.html — chunk 16
+
+--- Metrics ---
+Retrieval time: 1.17 ms
+Tool 'prices' latency: 0.0 ms
+Total time: 1.19 ms
+Retrieved chunks: 3
+Sources cited: 3
+Tool calls: {}
+--------------------------------------------------------------------------------

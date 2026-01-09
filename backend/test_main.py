@@ -1,4 +1,4 @@
-# test_main.py
+# backend/test_main.py
 """
 Quick offline test for the RAG agent CLI.
 Checks document ingestion, vectorstore, BM25, and query pipeline.

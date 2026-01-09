@@ -1,8 +1,14 @@
-# Implement agent planning + tool-use here.
-# Agent orchestrator - combine retriever + model + tools.
-# orchestration logic
 # app/agent.py
+# Agent orchestration logic (combine retriever + model + tools)
+
+# Note:
+# This agent returns grounded answers using retrieved context and tools only.
+# LLM-based answer generation was intentionally excluded for offline reproducibility.
+
 from app.retriever import retrieve
+from app.observability import init_metrics, finalize_metrics, format_metrics
+
+import time
 
 def format_citations(docs):
     """
@@ -16,84 +22,57 @@ def format_citations(docs):
 
         if source_type == "pdf" and meta.get("page") is not None:
             location = f"page {meta['page']}"
+        elif source_type == "csv" and meta.get("row") is not None:
+            location = f"row {meta['row']}"
         elif meta.get("chunk_id") is not None:
             location = f"chunk {meta['chunk_id']}"
-        elif meta.get("row") is not None:
-            location = f"row {meta['row']}"
         else:
             location = "unknown location"
 
         lines.append(f"[{i}] {source} — {location}")
 
-    if not lines:
-        return "Sources:\n(no sources retrieved)"
+    return "Sources:\n" + "\n".join(lines) if lines else "Sources:\n(no sources retrieved)"
 
-    return "Sources:\n" + "\n".join(lines)
+def run_agent(query, vectordb, tools=None, k=3, verbose=True):
+    """
+    Offline RAG agent orchestrator with modular observability.
+    Returns string with context snippet, tool output, citations, and optional metrics.
+    """
+    start_time = time.time()
+    metrics = init_metrics()
 
-def run_agent(query, vectordb, tools=None, k=3):
-    """
-    Offline agent orchestrator:
-    - Retrieves top-k relevant documents (hybrid BM25 + vector)
-    - Uses simple tools like prices.json if query mentions 'price'
-    - Returns a text answer combining context + tool output + formal citations
-    """
     # Step 1: Retrieve relevant documents
+    t0 = time.time()
     docs = retrieve(query, vectordb, k=k)
+    metrics["retrieval_time_ms"] = round((time.time() - t0) * 1000, 2)
+    metrics["num_retrieved_chunks"] = len(docs)
+
     context = "\n".join([d.page_content for d in docs])
 
     # Step 2: Use tools if relevant
     tool_output = ""
-    if tools:
-        if "prices" in tools and "price" in query.lower():
-            try:
-                price_result = tools["prices"](query)
-                tool_output = f"\n\n[Price Tool Output]: {price_result}"
-            except Exception as e:
-                tool_output = f"\n\n[Price Tool Error]: {str(e)}"
-
-    # Step 3: Generate offline "answer" (truncated context for readability)
-    # NOTE: If in a full LLM-based implementation, could use a prompt like:
-    # prompt = f"Answer the question based on the following context:\n{context}\n\nDo NOT invent sources; citations will be added automatically."
-    # answer = llm.generate(prompt)  # pseudo-code for LLM call
-
-    answer_text = f"Context (first 500 chars): {context[:500]}...\nAnswer based on retrieved documents.{tool_output}"
-
-    # Step 4: Append formal citations
-    citations = format_citations(docs)
-    final_answer = f"{answer_text}\n\n{citations}"
-
-    return final_answer
-
-def run_agent(query, vectordb, tools=None, k=3):
-    """
-    Offline agent orchestrator:
-    - Retrieves top-k relevant documents (hybrid BM25 + vector)
-    - Uses simple tools like prices.json if query mentions 'price'
-    - Returns a text answer combining context + tool output
-    - Appends a formal Sources section
-    """
-    # Step 1: Retrieve relevant documents
-    docs = retrieve(query, vectordb, k=k)
-    context = "\n".join([d.page_content for d in docs])
-
-    # Step 2: Use tools if relevant
-    tool_output = ""
-    if tools:
-        if "prices" in tools and "price" in query.lower():
-            try:
-                price_result = tools["prices"](query)
-                tool_output = f"\n\n[Price Tool Output]: {price_result}"
-            except Exception as e:
-                tool_output = f"\n\n[Price Tool Error]: {str(e)}"
+    if tools and "prices" in tools and "price" in query.lower():
+        t_tool = time.time()
+        try:
+            price_result = tools["prices"](query)
+            tool_output = f"\n\n[Price Tool Output]: {price_result}"
+            metrics["tool_calls"]["prices"] += 1
+        except Exception as e:
+            tool_output = f"\n\n[Price Tool Error]: {str(e)}"
+        metrics["tool_prices_ms"] = round((time.time() - t_tool) * 1000, 2)
 
     # Step 3: Build answer text
-    # Note: placeholder prompt for LLM could go here
-    # prompt = f"Answer the question based on the following context:\n{context}\n\nDo NOT invent sources; citations will be added automatically."
-
-    answer_text = f"Context (first 500 chars): {context[:500]}...\nAnswer based on retrieved documents.{tool_output}"
+    answer_text = (
+        f"Context (first 500 chars): {context[:500]}...\n"
+        f"Answer based on retrieved documents.{tool_output}"
+    )
 
     # Step 4: Append formal citations
     citations = format_citations(docs)
-    answer_with_citations = f"{answer_text}\n\n{citations}"
+    metrics["num_sources"] = len(docs)
 
-    return answer_with_citations
+    # Step 5: Finalise and format metrics
+    metrics = finalize_metrics(metrics, start_time)
+    metrics_block_str = format_metrics(metrics, verbose=verbose)
+
+    return f"{answer_text}\n\n{citations}{metrics_block_str}"
