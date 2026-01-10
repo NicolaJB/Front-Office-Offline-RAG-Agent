@@ -57,12 +57,10 @@ Although the scaffold provided for the task includes Docker and Make targets, th
 
 ### Installation
 
-*Notes on installation:*
-- **Python version**: Tested with Python 3.11. Using older versions (3.8/3.9) may require adjusting dependencies. Step 5 ensures the correct Python version is used.
-- **lxml issues on macOSc**: On macOS, lxml may fail to compile from source if libxml2 / libxslt headers are missing. Step 4 ensures these libraries are installed.
-- **Virtual environment**: Step 5 creates and activates a virtual environment to isolate dependencies. Always activate the venv before running or installing packages to avoid conflicts.
-- **Dependencies**: Step 7 installs all Python packages required for the agent.
-- **Data files**: Make sure the data/ folder contains all PDFs, CSVs, and HTML files needed by the agent.
+*Prerequisites:*
+- **Python 3.11** (older versions may require dependency adjustments).
+- **pip, venv** (standard Python tools)
+- **Data files:** Make sure the data/ folder contains all PDFs, CSVs, and HTML files needed by the agent
 
 1. Clone the repository:
 ```bash
@@ -72,33 +70,27 @@ git clone https://github.com/NicolaJB/Front-Office-RAG-Agent-Exercise
 ```bash
 cd <project-folder>
 ````
-3. Install Homebrew (if not already installed) for required libraries:
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-4. Install libxml2 and libxslt (needed for lxml):
-```bash
-brew install libxml2 libxslt
-````
-5. Create and activate a Python 3.11 virtual environment:
+3. Create and activate a Python 3.11 virtual environment:
 ```bash
 python3.11 -m venv venv
 source venv/bin/activate  # Mac/Linux
 # For Windows: venv\Scripts\activate
 ```
-6. Upgrade pip, wheel, and setuptools:
+4. Upgrade pip, wheel, and setuptools:
 ```bash
 pip install --upgrade pip wheel setuptools
 ```
-7. Install project dependencies:
+5. Install project dependencies:
 ```bash
 pip install -r backend/requirements.txt
 ```
-Optional: Force lxml install from a compatible wheel if needed:
+*Note: lxml should install automatically from precompiled wheels. On macOS, installation errors are rare, but if they occur, you may need the required libraries. Ensure Homebrew is installed, then run:*
 ```bash
-pip install lxml
+# Optional, macOS only
+brew install libxml2 libxslt
+pip install lxml --force-reinstall
 ```
-8. Start the Offline RAG Agent:
+6. Start the Offline RAG Agent:
 ```bash
 python -m app.main
 ```
