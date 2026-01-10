@@ -146,21 +146,23 @@ total_time_ms: 3.9
 ```bash
 python -m backend.test_main
 ```
-- Runs a small set of sample queries
-- Prints context, sources, and retrieval metrics
-- Confirms vectorstore and BM25 ingestion are working
+- Runs a small set of sample queries.
+- Prints context, sources, and retrieval metrics.
+- Confirms vectorstore and BM25 ingestion are working.
 
 **Evaluation Harness**
 ```bash
 python -m eval.run_eval
 ```
-- Loads a set of example queries from eval/queries.jsonl
-- Prints truncated answers (first 500 chars) in terminal
-- Logs full answers to eval/full_eval_output.txt for reference
+- Loads a set of example queries from eval/queries.jsonl.
+- Prints truncated answers (first 500 chars) in the terminal.
+- Logs full answers to eval/full_eval_output.txt for reference.
+- **Important:** full_eval_output.txt captures the retrieval tuples with context, sources, and per-query metrics, but tool outputs (e.g., price lookups) are only displayed in the interactive CLI and do not appear in the evaluation log. This ensures the offline evaluation remains fully reproducible without external calls.
+
 **Notes on evaluation and metrics:**
 - Evaluation is manual: full answers are logged; no automated correctness scoring.
 - Per-query metrics (retrieval time, tool latency, sources cited) are captured in the terminal and logs.
-- Demonstrates a robust hybrid RAG pipeline with optional tool integration, suitable for a junior-level offline exercise.
+- Demonstrates a robust hybrid RAG pipeline with optional tool integration, suitable for the scope of the current exercise.
 
 ### Vector Storage
 - TF-IDF vectors stored in memory (sklearn.TfidfVectorizer)
