@@ -7,15 +7,15 @@ It combines semantic vector search (TF-IDF) with keyword-based BM25 retrieval, s
 - Handles queries that embeddings alone may miss (numbers, tickers, rare terms).
 - Deduplicates overlapping chunks and ensures top-k results are unique for accurate citations.
 
-## Answer generation
+## Answer Generation
 - Returns relevant context, tool outputs (e.g., price lookup), and sources.
 - Terminal displays first 500 characters of context; full answers logged.
 
-## Modular tools
+## Modular Tools
 Add tools under app/tools/ and update mapping in app/main.py.
 - Example: price tool triggered for queries containing "price".
 
-## Lightweight observability
+## Lightweight Observability
 Per-query metrics: retrieval latency, tool runtime, sources cited.
 
 ## Project Structure
@@ -43,7 +43,7 @@ rag-agent-exercise/
 ├─ .env.example          # Template for environment configuration (optional keys for OpenAI, Qdrant, embeddings, **not required**)
 └─ README.md             # Project overview, installation, features, usage, and evaluation instructions
 ```
-**Notes on structure**:
+*Notes on structure*:
 - The agent runs fully offline, with no external services required.
 - Hybrid retrieval combines vector-based TF-IDF with BM25 keyword search for robust query handling.
 - Modular design allows easy addition of new tools (app/tools/) or new document types (app/ingest.py).
@@ -58,18 +58,18 @@ Although the scaffold provided for the task includes Docker and Make targets, th
 ### Installation
 
 *Prerequisites:*
-- **Python 3.11** (older versions may require dependency adjustments).
+- **Python 3.11** (older versions may require dependency adjustments)
 - **pip, venv** (standard Python tools)
 - **Data files:** Make sure the data/ folder contains all PDFs, CSVs, and HTML files needed by the agent
 
 1. Clone the repository:
 ```bash
 git clone https://github.com/NicolaJB/Front-Office-RAG-Agent-Exercise
-````
+```
 2. Navigate into the project folder. Note: If you cloned from GitHub, the folder will be named 'Front-Office-RAG-Agent-Exercise':
 ```bash
 cd <project-folder>
-````
+```
 3. Create and activate a Python 3.11 virtual environment:
 ```bash
 python3.11 -m venv venv
@@ -113,7 +113,7 @@ All documents are cleaned and chunked to remove parsing artifacts, ensuring cohe
 #### Error Handling
 Error handling is intentionally minimal: malformed or unsupported queries may return empty or partial results. This is a deliberate design trade-off to keep the implementation concise, fully offline, and suitable as a junior-level exercise.
 
-### Interactive CLI/Terminal Usage Example
+## Interactive CLI/Terminal Usage Example
 - Uses hybrid retrieval (TF-IDF semantic ranking + BM25 keyword matching).
 - Displays the top retrieved sources, per-query metrics, and any triggered tools (e.g., price lookup).
 - Only the first 500 characters of retrieved context are shown in the terminal for readability.
@@ -167,7 +167,7 @@ total_time_ms: 3.9
 - **Full answers are only logged when running the evaluation harness (python -m eval.run_eval)**.
 - Regular CLI usage (python -m app.main) does not write full answers to a file.
 
-### Offline Test & Evaluation
+## Offline Test & Evaluation
 
 **Quick Offline Test**
 ```bash
@@ -186,12 +186,12 @@ python -m eval.run_eval
 - Logs full answers to eval/full_eval_output.txt for reference.
 - **Important:** full_eval_output.txt captures the retrieval tuples with context, sources, and per-query metrics, but tool outputs (e.g., price lookups) are only displayed in the interactive CLI and do not appear in the evaluation log. This ensures the offline evaluation remains fully reproducible without external calls.
 
-**Notes on evaluation and metrics:**
+*Notes on evaluation and metrics:*
 - Evaluation is manual: full answers are logged; no automated correctness scoring.
 - Per-query metrics (retrieval time, tool latency, sources cited) are captured in the terminal and logs.
 - Demonstrates a robust hybrid RAG pipeline with optional tool integration, suitable for the scope of the current exercise.
 
-### Vector Storage
+**Vector Storage**
 - TF-IDF vectors stored in memory (sklearn.TfidfVectorizer)
 - Combined with BM25 for hybrid retrieval 
 - Optional: integrate Qdrant for persistent vector storage, scaling, or multi-user deployments
