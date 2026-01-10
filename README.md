@@ -53,19 +53,54 @@ rag-agent-exercise/
 - **docker/directory** included as provided in the original scaffold with a placeholder docker-compose.yml; not used by the offline agent and not required for local execution.
 
 ## Getting Started
+Although the scaffold provided for the task includes Docker and Make targets, this implementation runs fully offline and can be executed directly via the Python CLI.
 
 ### Installation
-Although the original scaffold includes Docker and Make targets, this implementation runs fully offline and can be executed directly via the Python CLI.
+
+*Notes on installation:*
+- **Python version**: Tested with Python 3.11. Using older versions (3.8/3.9) may require adjusting dependencies. Step 5 ensures the correct Python version is used.
+- **lxml issues on macOSc**: On macOS, lxml may fail to compile from source if libxml2 / libxslt headers are missing. Step 4 ensures these libraries are installed.
+- **Virtual environment**: Step 5 creates and activates a virtual environment to isolate dependencies. Always activate the venv before running or installing packages to avoid conflicts.
+- **Dependencies**: Step 7 installs all Python packages required for the agent.
+- **Data files**: Make sure the data/ folder contains all PDFs, CSVs, and HTML files needed by the agent.
+
+1. Clone the repository:
 ```bash
 git clone https://github.com/NicolaJB/Front-Office-RAG-Agent-Exercise
-cd rag-agent-exercise
-```
-Create a Python virtual environment (venv) before installing dependencies:
+````
+2. Navigate into the project folder. Note: If you cloned from GitHub, the folder will be named 'Front-Office-RAG-Agent-Exercise':
 ```bash
-python -m venv venv
+cd <project-folder>
+````
+3. Install Homebrew (if not already installed) for required libraries:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+4. Install libxml2 and libxslt (needed for lxml):
+```bash
+brew install libxml2 libxslt
+````
+5. Create and activate a Python 3.11 virtual environment:
+```bash
+python3.11 -m venv venv
 source venv/bin/activate  # Mac/Linux
-venv\Scripts\activate  #Windows
+# For Windows: venv\Scripts\activate
+```
+6. Upgrade pip, wheel, and setuptools:
+```bash
+pip install --upgrade pip wheel setuptools
+```
+7. Install project dependencies:
+```bash
 pip install -r backend/requirements.txt
+```
+Optional: Force lxml install from a compatible wheel if needed:
+```bash
+pip install lxml
+```
+8. Start the Offline RAG Agent:
+```bash
+python -m app.main
 ```
 ### Data
 
@@ -94,7 +129,7 @@ Error handling is intentionally minimal: malformed or unsupported queries may re
 - Tool calls are optional and modular; queries containing registered trigger keywords (such as "price") automatically invoke the corresponding tool.
 **Example CLI Session: Price + Document Query**
 
-Start the agent:
+Start the agent (as per the installation steps above):
 ```bash
 python -m app.main
 ```
