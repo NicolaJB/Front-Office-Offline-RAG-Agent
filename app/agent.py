@@ -1,78 +1,70 @@
 # app/agent.py
-# Agent orchestration logic (combine retriever + model + tools)
-
-# Note:
-# This agent returns grounded answers using retrieved context and tools only.
-# LLM-based answer generation was intentionally excluded for offline reproducibility.
-
-from app.retriever import retrieve
-from app.observability import init_metrics, finalize_metrics, format_metrics
-
 import time
+from app.retriever import retrieve
 
-def format_citations(docs):
+def run_agent(query, vectordb, tools=None, k=3):
     """
-    Build a formal Sources section from retrieved documents.
+    Run offline RAG agent for a single query.
+
+    Returns:
+    - answer_text (str)
+    - retrieved_chunks (list of dicts, unique)
+    - tool_outputs (dict)
+    - metrics (dict)
     """
-    lines = []
-    for i, doc in enumerate(docs, start=1):
-        meta = doc.metadata or {}
-        source = meta.get("source", "unknown")
-        source_type = meta.get("source_type")
+    metrics = {}
+    start_total = time.time()
 
-        if source_type == "pdf" and meta.get("page") is not None:
-            location = f"page {meta['page']}"
-        elif source_type == "csv" and meta.get("row") is not None:
-            location = f"row {meta['row']}"
-        elif meta.get("chunk_id") is not None:
-            location = f"chunk {meta['chunk_id']}"
-        else:
-            location = "unknown location"
+    # --- Retrieval ---
+    start_retrieval = time.time()
+    retrieved_chunks = retrieve(query, vectordb, k=k)
 
-        lines.append(f"[{i}] {source} — {location}")
+    # --- Remove duplicates based on content ---
+    unique_seen = set()
+    unique_chunks = []
+    for c in retrieved_chunks:
+        content_hash = hash(c['context'])
+        if content_hash not in unique_seen:
+            unique_seen.add(content_hash)
+            unique_chunks.append(c)
+    retrieved_chunks = unique_chunks
 
-    return "Sources:\n" + "\n".join(lines) if lines else "Sources:\n(no sources retrieved)"
+    metrics['retrieval_time_ms'] = round((time.time() - start_retrieval) * 1000, 2)
 
-def run_agent(query, vectordb, tools=None, k=3, verbose=True):
-    """
-    Offline RAG agent orchestrator with modular observability.
-    Returns string with context snippet, tool output, citations, and optional metrics.
-    """
-    start_time = time.time()
-    metrics = init_metrics()
+    # --- Tool execution ---
+    tool_outputs = {}
+    tool_calls_count = 0
+    if tools:
+        for tool_name, tool_func in tools.items():
+            # Define keywords that trigger this tool
+            trigger_keywords = [tool_name.lower()]
+            if tool_name.lower() == "prices":
+                trigger_keywords += ["price", "prices", "eurusd"]
 
-    # Step 1: Retrieve relevant documents
-    t0 = time.time()
-    docs = retrieve(query, vectordb, k=k)
-    metrics["retrieval_time_ms"] = round((time.time() - t0) * 1000, 2)
-    metrics["num_retrieved_chunks"] = len(docs)
+            # Trigger tool only if at least one keyword appears in the query
+            if any(kw in query.lower() for kw in trigger_keywords):
+                start_tool = time.time()
+                try:
+                    output = tool_func(query)
+                    tool_outputs[tool_name] = output
+                    tool_calls_count += 1
+                    metrics[f"{tool_name}_latency_ms"] = round((time.time() - start_tool) * 1000, 2)
+                except Exception as e:
+                    tool_outputs[tool_name] = f"Tool failed: {str(e)}"
+                    tool_calls_count += 1
+                    metrics[f"{tool_name}_latency_ms"] = None
 
-    context = "\n".join([d.page_content for d in docs])
+    # --- Compose professional answer ---
+    if tool_outputs:
+        answer_text = f"Tool-triggered answer:\n{tool_outputs}"
+    else:
+        answer_text = "Answer based on retrieved documents."
 
-    # Step 2: Use tools if relevant
-    tool_output = ""
-    if tools and "prices" in tools and "price" in query.lower():
-        t_tool = time.time()
-        try:
-            price_result = tools["prices"](query)
-            tool_output = f"\n\n[Price Tool Output]: {price_result}"
-            metrics["tool_calls"]["prices"] += 1
-        except Exception as e:
-            tool_output = f"\n\n[Price Tool Error]: {str(e)}"
-        metrics["tool_prices_ms"] = round((time.time() - t_tool) * 1000, 2)
+    # --- Metrics ---
+    metrics['retrieved_chunks'] = len(retrieved_chunks)
+    # Count unique source files only
+    metrics['sources_cited'] = len(set(c['source_file'] for c in retrieved_chunks))
+    metrics['tool_calls'] = tool_calls_count
+    metrics['total_time_ms'] = round((time.time() - start_total) * 1000, 2)
 
-    # Step 3: Build answer text
-    answer_text = (
-        f"Context (first 500 chars): {context[:500]}...\n"
-        f"Answer based on retrieved documents.{tool_output}"
-    )
-
-    # Step 4: Append formal citations
-    citations = format_citations(docs)
-    metrics["num_sources"] = len(docs)
-
-    # Step 5: Finalise and format metrics
-    metrics = finalize_metrics(metrics, start_time)
-    metrics_block_str = format_metrics(metrics, verbose=verbose)
-
-    return f"{answer_text}\n\n{citations}{metrics_block_str}"
+    return answer_text, retrieved_chunks, tool_outputs, metrics

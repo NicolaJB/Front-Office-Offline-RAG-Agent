@@ -1,47 +1,86 @@
 # app/retriever.py
 """
-Hybrid retriever for offline RAG agent:
-- Combines vector-based semantic search (TF-IDF) with keyword search (BM25)
-- Handles cases where exact terms (numbers, tickers, or rare words) may be missed by embeddings
-- Keeps only unique chunks after combining results from both retrieval methods
+Hybrid retriever with source-aware output.
+
+Features:
+- TF-IDF vector search + optional BM25 keyword search
+- Weighted hybrid score
+- Ensures top-k unique sources first
+- Returns chunks with metadata for business-friendly display
+
+Returned dict per chunk:
+- source_file
+- context
+- place_within_source
+- score
 """
+
 from rank_bm25 import BM25Okapi
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 bm25_model = None
 bm25_corpus = []
 
 def build_bm25(docs):
+    """Build BM25 index from document chunks"""
     global bm25_model, bm25_corpus
     bm25_corpus = [doc.page_content.split() for doc in docs]
     bm25_model = BM25Okapi(bm25_corpus)
 
-def retrieve(query, vectordb, k=3, hybrid=True):
-    # Vector retrieval using TF-IDF
+def retrieve(query, vectordb, k=3, hybrid=True, alpha=0.5, min_score_ratio=0.5):
     vectorizer = vectordb["vectorizer"]
     embeddings = vectordb["embeddings"]
+    docs = vectordb["docs"]
+
     query_vec = vectorizer.transform([query])
     sims = cosine_similarity(query_vec, embeddings).flatten()
-    top_vec_indices = sims.argsort()[-k:][::-1]
-    vector_results = [vectordb["docs"][i] for i in top_vec_indices]
 
     if hybrid:
-        global bm25_model, bm25_corpus
+        global bm25_model
         if bm25_model is None:
             raise ValueError("BM25 not built. Call build_bm25 first.")
-
         query_tokens = query.split()
         bm25_scores = bm25_model.get_scores(query_tokens)
-        top_bm25_indices = bm25_scores.argsort()[-k:][::-1]
-        bm25_results = [vectordb["docs"][i] for i in top_bm25_indices if i < len(vectordb["docs"])]
+        combined_scores = alpha * sims + (1 - alpha) * bm25_scores
+    else:
+        combined_scores = sims
 
-        # Print top vector results
-        for i, doc in enumerate(vector_results):
-            print(f"Vector Top-{i + 1}: {doc.metadata.get('source', 'unknown')[:30]}...")
+    threshold = min_score_ratio * combined_scores.max()
+    candidates = [(i, combined_scores[i]) for i in range(len(combined_scores)) if combined_scores[i] >= threshold]
+    candidates.sort(key=lambda x: x[1], reverse=True)
 
-        # Merge and deduplicate
-        combined = {doc.page_content: doc for doc in vector_results + bm25_results}
-        return list(combined.values())[:k]
+    selected = []
+    sources_seen = set()
 
-    return vector_results
+    # Unique sources first
+    for idx, score in candidates:
+        doc = docs[idx]
+        source = doc.metadata.get("source", "unknown")
+        if source not in sources_seen:
+            selected.append({
+                "source_file": source,
+                "context": doc.page_content[:300].replace("\n", " "),
+                "place_within_source": doc.metadata.get("chunk", "unknown"),
+                "score": score
+            })
+            sources_seen.add(source)
+        if len(selected) >= k:
+            break
+
+    # Fill remaining if needed
+    if len(selected) < k:
+        for idx, score in candidates:
+            doc = docs[idx]
+            source = doc.metadata.get("source", "unknown")
+            if any(d['source_file'] == source and d['context'] == doc.page_content[:300] for d in selected):
+                continue
+            selected.append({
+                "source_file": source,
+                "context": doc.page_content[:300].replace("\n", " "),
+                "place_within_source": doc.metadata.get("chunk", "unknown"),
+                "score": score
+            })
+            if len(selected) >= k:
+                break
+
+    return selected

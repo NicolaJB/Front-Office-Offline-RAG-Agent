@@ -1,124 +1,95 @@
 # app/ingest.py
+"""
+Document ingestion and vectorstore construction.
+
+- Load TXT, HTML, Markdown, CSV, PDF
+- Split into chunks
+- Attach metadata (source file, chunk index)
+- Build TF-IDF vectorstore
+"""
+
 import os
-import pandas as pd
+import csv
+from dataclasses import dataclass
+from sklearn.feature_extraction.text import TfidfVectorizer
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
-# Simple offline Document class
+@dataclass
 class Document:
-    def __init__(self, page_content, metadata=None):
-        self.page_content = page_content
-        self.metadata = metadata or {}
+    page_content: str
+    metadata: dict
 
-DATA_DIR = "data"
+TEXT_EXTENSIONS = (".txt", ".html", ".md")
+CSV_EXTENSIONS = (".csv",)
+PDF_EXTENSIONS = (".pdf",)
 
-def load_text_file(filepath):
-    with open(filepath, "r", encoding="utf-8") as f:
-        return f.read()
-
-def load_and_split_docs(data_dir=DATA_DIR, chunk_size=500, chunk_overlap=50):
+def load_and_split_docs(data_dir="data", chunk_size=500):
     docs = []
 
-    # Load documents with metadata
     for root, _, files in os.walk(data_dir):
-        for filename in files:
-            filepath = os.path.join(root, filename)
+        for fname in files:
+            if fname.startswith("."):
+                continue
+            path = os.path.join(root, fname)
+            ext = os.path.splitext(fname)[1].lower()
 
-            # TXT
-            if filename.endswith(".txt"):
-                text = load_text_file(filepath)
+            text = ""
+
+            if ext in PDF_EXTENSIONS:
+                try:
+                    reader = PdfReader(path)
+                    text = "\n".join(page.extract_text() or "" for page in reader.pages)
+                except Exception as e:
+                    print(f"Failed to read PDF {path}: {e}")
+                    continue
+
+            elif ext in CSV_EXTENSIONS:
+                try:
+                    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                        reader = csv.reader(f)
+                        rows = [", ".join(row) for row in reader]
+                        text = "\n".join(rows)
+                except Exception as e:
+                    print(f"Failed to read CSV {path}: {e}")
+                    continue
+
+            elif ext in TEXT_EXTENSIONS:
+                try:
+                    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                        text = f.read()
+                    if ext == ".html":
+                        soup = BeautifulSoup(text, "lxml")
+                        text = soup.get_text(separator="\n")
+                except Exception as e:
+                    print(f"Failed to read {ext} file {path}: {e}")
+                    continue
+            else:
+                continue  # skip unsupported files
+
+            # Split into chunks
+            for i in range(0, len(text), chunk_size):
+                chunk_text = text[i:i+chunk_size].strip()
+                if not chunk_text:
+                    continue
                 docs.append(
                     Document(
-                        page_content=text,
-                        metadata={"source": filepath, "source_type": "txt"}
+                        page_content=chunk_text,
+                        metadata={
+                            "source": path,
+                            "chunk": i // chunk_size + 1
+                        }
                     )
                 )
+    return docs
 
-            # PDF (page-aware)
-            elif filename.endswith(".pdf"):
-                reader = PdfReader(filepath)
-                for page_num, page in enumerate(reader.pages, start=1):
-                    page_text = page.extract_text()
-                    if page_text:
-                        docs.append(
-                            Document(
-                                page_content=page_text,
-                                metadata={
-                                    "source": filepath,
-                                    "source_type": "pdf",
-                                    "page": page_num,
-                                },
-                            )
-                        )
 
-            # HTML
-            elif filename.endswith(".html") or filename.endswith(".htm"):
-                with open(filepath, "r", encoding="utf-8") as f:
-                    soup = BeautifulSoup(f, "lxml")
-                    text = soup.get_text()
-                    docs.append(
-                        Document(
-                            page_content=text,
-                            metadata={"source": filepath, "source_type": "html"}
-                        )
-                    )
-
-            # CSV (row-aware)
-            elif filename.endswith(".csv"):
-                df = pd.read_csv(filepath)
-                for idx, row in df.iterrows():
-                    row_text = " | ".join(row.astype(str).tolist())
-                    docs.append(
-                        Document(
-                            page_content=row_text,
-                            metadata={
-                                "source": filepath,
-                                "source_type": "csv",
-                                "row": idx,
-                            },
-                        )
-                    )
-
-    # Split documents into chunks
-    chunks = []
-    chunk_id = 0
-
-    for doc in docs:
-        text = doc.page_content
-        start = 0
-
-        while start < len(text):
-            end = start + chunk_size
-            chunk_text = text[start:end]
-
-            chunks.append(
-                Document(
-                    page_content=chunk_text,
-                    metadata={
-                        **doc.metadata,
-                        "chunk_id": chunk_id,
-                    },
-                )
-            )
-
-            chunk_id += 1
-            start += chunk_size - chunk_overlap
-
-    print(f"Loaded {len(docs)} documents, split into {len(chunks)} chunks.")
-    return chunks
-
-def build_vectorstore(chunks):
-    from sklearn.feature_extraction.text import TfidfVectorizer
-
-    texts = [doc.page_content for doc in chunks]
-    vectorizer = TfidfVectorizer()
-    embeddings = vectorizer.fit_transform(texts)  # sparse matrix
-
-    vectordb = {
+def build_vectorstore(docs):
+    """Build a TF-IDF vectorstore from document chunks"""
+    vectorizer = TfidfVectorizer(stop_words="english")
+    embeddings = vectorizer.fit_transform([d.page_content for d in docs])
+    return {
         "vectorizer": vectorizer,
         "embeddings": embeddings,
-        "docs": chunks,
+        "docs": docs
     }
-
-    print(f"Vectorstore created with {len(chunks)} embeddings.")
-    return vectordb

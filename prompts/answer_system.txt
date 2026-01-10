@@ -1,8 +1,11 @@
+# Not used by offline RAG agent, which returns answers purely from retrieved context and tools.
+# Included here for reference or future LLM-based extensions.
+
+
 # Answer using provided context only; cite chunks like [doc@start:end].
-
-with open("prompts/answer_system.txt") as f:
-    system_prompt = f.read()
-
-prompt = f"{system_prompt}\n\nContext:\n{retrieved_context}\n\nQuestion: {query}"
-answer = llm.generate(prompt)
+# with open("prompts/answer_system.txt") as f:
+#     system_prompt = f.read()
+#
+# prompt = f"{system_prompt}\n\nContext:\n{retrieved_context}\n\nQuestion: {query}"
+# answer = llm.generate(prompt)
 

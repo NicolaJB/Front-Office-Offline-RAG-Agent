@@ -1,6 +1,5 @@
 # app/observability.py
-"""Lightweight per-query metrics for offline RAG agent,
-    optionally printed to CLI; fully offline, no external dependencies."""
+"""Lightweight per-query metrics for an offline RAG agent."""
 import time
 from collections import Counter
 

@@ -1,5 +1,10 @@
 # app/tools/prices.py
-# looks up price for given financial instrument from stub JSON file
+"""
+Price lookup tool for the offline RAG agent.
+
+- Retrieves prices for financial instruments from a stub JSON file (prices_stub/prices.json).
+- Designed to be called from the agent when queries contain keywords like "price".
+"""
 import json
 import os
 

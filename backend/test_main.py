@@ -16,13 +16,13 @@ def run_test():
     print("Building vectorstore...")
     vectordb = build_vectorstore(chunks)
 
-    print("Initializing BM25...")
+    print("Initialising BM25...")
     build_bm25(chunks)
 
     # Sample queries for testing
     test_queries = [
         "What are the key risks for JP Morgan in Q3 2024?",
-        "Summarize Apple's revenue in the last quarter.",
+        "Summarise Apple's revenue in the last quarter.",
         "List the latest Amazon logistics challenges."
     ]
 
