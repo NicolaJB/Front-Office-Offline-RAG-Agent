@@ -1,4 +1,19 @@
 # app/agent.py
+"""
+Offline RAG Agent
+
+This module defines `run_agent`, a single-query, fully offline Retrieval-Augmented Generation (RAG) agent.
+It performs the following steps:
+
+1. Retrieval: uses a hybrid retriever (TF-IDF + BM25) to fetch the top-k document chunks relevant to the query.
+2. Deduplication: removes duplicate chunks based on content to ensure unique citations.
+3. Tool invocation: optionally executes modular tools (e.g., price lookups) triggered by query keywords.
+4. Answer composition: returns a professional response combining retrieved context and tool outputs.
+5. Metrics collection: captures retrieval time, tool latency, number of chunks retrieved, sources cited, tool calls, and total execution time.
+
+All operations are offline and reproducible, requiring no external services or APIs.
+
+"""
 import time
 from app.retriever import retrieve
 
