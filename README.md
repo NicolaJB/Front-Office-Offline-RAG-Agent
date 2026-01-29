@@ -1,4 +1,4 @@
-# Front Office Offline RAG Agent - Exercise Task
+# Front Office Offline RAG Agent
 An interactive offline Retrieval-Augmented Generation (RAG) agent for financial documents.
 It combines semantic vector search (TF-IDF) with keyword-based BM25 retrieval, supports modular tools, and prints lightweight runtime metrics.
 
