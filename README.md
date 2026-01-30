@@ -120,6 +120,7 @@ Error handling is intentionally minimal: malformed or unsupported queries may re
 - Only the first 500 characters of retrieved context are shown in the terminal for readability.
 - Full context and answers are internally used and logged to eval/full_eval_output.txt.
 - Tool calls are optional and modular; queries containing registered trigger keywords (such as "price") automatically invoke the corresponding tool.
+  
 **Example CLI Session: Price + Document Query**
 
 Start the agent (as per the installation steps above):
