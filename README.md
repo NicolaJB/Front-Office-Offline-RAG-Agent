@@ -111,7 +111,8 @@ Optional folders demonstrate ingestion of additional document types; the agent r
 All documents are cleaned and chunked to remove parsing artifacts, ensuring coherent context in CLI output.
 
 #### Error Handling
-Error handling is intentionally minimal: malformed or unsupported queries may return empty or partial results. This is a deliberate design trade-off to keep the implementation concise, fully offline, and suitable as a junior-level exercise.
+Error handling is intentionally minimal: malformed or unsupported queries may return empty or partial results. Designed as a concise, offline-first prototype focusing on retrieval quality, modularity, and observability.
+
 
 ## Interactive CLI/Terminal Usage Example
 - Uses hybrid retrieval (TF-IDF semantic ranking + BM25 keyword matching).
